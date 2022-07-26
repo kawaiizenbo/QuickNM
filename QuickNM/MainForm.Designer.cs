@@ -31,8 +31,6 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.resolveHostnameCheckBox = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.endIPTextBox = new System.Windows.Forms.TextBox();
-            this.startIPTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.saveButton = new System.Windows.Forms.Button();
@@ -41,6 +39,9 @@
             this.deviceListTreeView = new System.Windows.Forms.TreeView();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
+            this.startIPComboBox = new System.Windows.Forms.ComboBox();
+            this.endIPComboBox = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -51,10 +52,10 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.endIPComboBox);
+            this.groupBox1.Controls.Add(this.startIPComboBox);
             this.groupBox1.Controls.Add(this.resolveHostnameCheckBox);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.endIPTextBox);
-            this.groupBox1.Controls.Add(this.startIPTextBox);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
@@ -83,26 +84,6 @@
             this.label2.Size = new System.Drawing.Size(80, 13);
             this.label2.TabIndex = 3;
             this.label2.Text = "End IP Address";
-            // 
-            // endIPTextBox
-            // 
-            this.endIPTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.endIPTextBox.Location = new System.Drawing.Point(150, 45);
-            this.endIPTextBox.Name = "endIPTextBox";
-            this.endIPTextBox.Size = new System.Drawing.Size(204, 20);
-            this.endIPTextBox.TabIndex = 2;
-            this.endIPTextBox.Text = "192.168.0.255";
-            // 
-            // startIPTextBox
-            // 
-            this.startIPTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.startIPTextBox.Location = new System.Drawing.Point(150, 19);
-            this.startIPTextBox.Name = "startIPTextBox";
-            this.startIPTextBox.Size = new System.Drawing.Size(204, 20);
-            this.startIPTextBox.TabIndex = 1;
-            this.startIPTextBox.Text = "192.168.0.0";
             // 
             // label1
             // 
@@ -134,6 +115,7 @@
             this.saveButton.TabIndex = 2;
             this.saveButton.Text = "Save";
             this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
             // startButton
             // 
@@ -171,7 +153,8 @@
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.statusLabel});
+            this.statusLabel,
+            this.progressBar});
             this.statusStrip1.Location = new System.Drawing.Point(0, 539);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(384, 22);
@@ -184,6 +167,29 @@
             this.statusLabel.Size = new System.Drawing.Size(33, 17);
             this.statusLabel.Text = "Init...";
             // 
+            // progressBar
+            // 
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(200, 16);
+            this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar.Visible = false;
+            // 
+            // startIPComboBox
+            // 
+            this.startIPComboBox.FormattingEnabled = true;
+            this.startIPComboBox.Location = new System.Drawing.Point(150, 19);
+            this.startIPComboBox.Name = "startIPComboBox";
+            this.startIPComboBox.Size = new System.Drawing.Size(150, 21);
+            this.startIPComboBox.TabIndex = 5;
+            // 
+            // endIPComboBox
+            // 
+            this.endIPComboBox.FormattingEnabled = true;
+            this.endIPComboBox.Location = new System.Drawing.Point(150, 45);
+            this.endIPComboBox.Name = "endIPComboBox";
+            this.endIPComboBox.Size = new System.Drawing.Size(150, 21);
+            this.endIPComboBox.TabIndex = 6;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -193,6 +199,7 @@
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.MinimumSize = new System.Drawing.Size(400, 600);
             this.Name = "MainForm";
             this.Text = "QuickNM";
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -212,8 +219,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox resolveHostnameCheckBox;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox endIPTextBox;
-        private System.Windows.Forms.TextBox startIPTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button saveButton;
@@ -222,6 +227,9 @@
         private System.Windows.Forms.TreeView deviceListTreeView;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
+        private System.Windows.Forms.ToolStripProgressBar progressBar;
+        private System.Windows.Forms.ComboBox endIPComboBox;
+        private System.Windows.Forms.ComboBox startIPComboBox;
     }
 }
 

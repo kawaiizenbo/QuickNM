@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -32,13 +33,26 @@ namespace QuickNM
                 if (s.Trim() == "") { continue; }
                 oui.Add(s.Split('=')[0].Trim(), s.Split('=')[1].Split('\\')[0].Trim());
             }
+            IPHostEntry localIPs = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in localIPs.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    byte[] start = IPv4String2ByteArray(ip.ToString());
+                    byte[] end = IPv4String2ByteArray(ip.ToString());
+                    start[3] = 0;
+                    end[3] = 255;
+                    startIPComboBox.Items.Add($"{start[0]}.{start[1]}.{start[2]}.{start[3]}");
+                    endIPComboBox.Items.Add($"{end[0]}.{end[1]}.{end[2]}.{end[3]}");
+                }
+            }
             statusLabel.Text = "Ready.";
         }
 
         private void startButton_Click(object sender, EventArgs e)
         {
             // Check if IPs are in valid format
-            if (!(VerifyIPv4(startIPTextBox.Text) && VerifyIPv4(endIPTextBox.Text)))
+            if (!(VerifyIPv4(startIPComboBox.Text) && VerifyIPv4(endIPComboBox.Text)))
             {
                 MessageBox.Show("IP is invalid.", "Error");
                 return;
@@ -48,10 +62,18 @@ namespace QuickNM
             deviceListTreeView.Nodes.Clear();
 
             // Convert IPs to byte[]
-            byte[] startIPAddress = IPv4String2ByteArray(startIPTextBox.Text);
-            byte[] endIPAddress = IPv4String2ByteArray(endIPTextBox.Text);
+            byte[] startIPAddress = IPv4String2ByteArray(startIPComboBox.Text);
+            byte[] endIPAddress = IPv4String2ByteArray(endIPComboBox.Text);
 
             Ping ping = new Ping();
+
+            int totalamount = (endIPAddress[0] - startIPAddress[0]) +
+                (endIPAddress[1] - startIPAddress[1]) +
+                (endIPAddress[2] - startIPAddress[2]) +
+                (endIPAddress[3] - startIPAddress[3]) + 1;
+
+            progressBar.Maximum = totalamount;
+            progressBar.Visible = true;
 
             // god have mercy on us
             for (int i = startIPAddress[0]; i <= endIPAddress[0]; i++)
@@ -75,11 +97,14 @@ namespace QuickNM
                             {
                                 Console.WriteLine(ex.Message);
                             }
+                            progressBar.Value++;
                             Application.DoEvents();
                         }
                     }
                 }
             }
+
+            progressBar.Visible = false;
 
             // get mac addresses with dark witchcraft (System.Runtime.InteropServices)
             statusLabel.Text = "Searching MAC Addresses.";
@@ -107,7 +132,7 @@ namespace QuickNM
             if (resolveHostnameCheckBox.Checked)
             {
                 Application.DoEvents();
-                statusLabel.Text = "Resolving hostnames.";
+                statusLabel.Text = "Resolving hostnames (BE PATIENT).";
                 int n = 0;
                 foreach (var device in deviceListTreeView.Nodes)
                 {
@@ -130,6 +155,15 @@ namespace QuickNM
                 }
             }
             statusLabel.Text = "Done.";
+        }
+
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            List<string> toSave = new List<string>();
+            foreach (var device in deviceListTreeView.Nodes)
+            {
+                toSave.Add(device.ToString());
+            }
         }
 
         public bool VerifyIPv4(string ip)
