@@ -13,7 +13,7 @@ namespace QuickNM
     {
         [DllImport("iphlpapi.dll", ExactSpelling = true)]
         public static extern int SendARP(int DestIP, int SrcIP, [Out] byte[] pMacAddr, ref int PhyAddrLen);
-        private static Dictionary<string, string> oui = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> oui = new Dictionary<string, string>();
 
         public MainForm()
         {
@@ -73,6 +73,7 @@ namespace QuickNM
                 (endIPAddress[3] - startIPAddress[3]) + 1;
 
             progressBar.Maximum = totalamount;
+            progressBar.Value = 0;
             progressBar.Visible = true;
 
             // god have mercy on us
@@ -87,7 +88,7 @@ namespace QuickNM
                             statusLabel.Text = $"Pinging: {i}.{j}.{k}.{l}";
                             try
                             {
-                                PingReply reply = ping.Send($"{i}.{j}.{k}.{l}", 1);
+                                PingReply reply = ping.Send($"{i}.{j}.{k}.{l}", 50);
                                 if (reply.Address != null)
                                 {
                                     deviceListTreeView.Nodes.Add(reply.Address.ToString());
@@ -107,10 +108,10 @@ namespace QuickNM
             progressBar.Visible = false;
 
             // get mac addresses with dark witchcraft (System.Runtime.InteropServices)
-            statusLabel.Text = "Searching MAC Addresses.";
             int m = 0;
             foreach (var device in deviceListTreeView.Nodes)
             {
+                statusLabel.Text = $"Searching MAC Address ({device.ToString().Replace("TreeNode: ", "")}).";
                 try
                 {
                     IPAddress hostIPAddress = IPAddress.Parse(device.ToString().Replace("TreeNode: ", ""));
@@ -132,10 +133,10 @@ namespace QuickNM
             if (resolveHostnameCheckBox.Checked)
             {
                 Application.DoEvents();
-                statusLabel.Text = "Resolving hostnames (BE PATIENT).";
                 int n = 0;
                 foreach (var device in deviceListTreeView.Nodes)
                 {
+                    statusLabel.Text = $"Resolving hostname ({device.ToString().Replace("TreeNode: ", "")}).";
                     try
                     {
                         string hostname = "[None]";
@@ -160,10 +161,16 @@ namespace QuickNM
         private void saveButton_Click(object sender, EventArgs e)
         {
             List<string> toSave = new List<string>();
-            foreach (var device in deviceListTreeView.Nodes)
+            foreach (TreeNode device in deviceListTreeView.Nodes)
             {
-                toSave.Add(device.ToString());
+                toSave.Add($"{device.ToString().Replace("TreeNode: ", "")}");
+                foreach (TreeNode deviceProperty in device.Nodes)
+                {
+                    toSave.Add($" - {deviceProperty.ToString().Replace("TreeNode: ", "")}");
+                }
+                toSave.Add("");
             }
+            File.WriteAllLines("output.txt", toSave.ToArray());
         }
 
         public bool VerifyIPv4(string ip)
