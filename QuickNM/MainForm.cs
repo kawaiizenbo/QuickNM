@@ -155,7 +155,7 @@ namespace QuickNM
                     Application.DoEvents();
                 }
             }
-            statusLabel.Text = "Done.";
+            statusLabel.Text = $"Done ({deviceListTreeView.Nodes.Count} devices detected).";
         }
 
         private void saveButton_Click(object sender, EventArgs e)
